@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GritSkool Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    :root {
+      --primary: #6366f1;
+      --secondary: #38bdf8;
+      --accent: #fbbf24;
+      --success: #22c55e;
+      --danger: #e94e77;
+      --bg-glass: rgba(255,255,255,0.7);
+      --bg-gradient: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%);
+      --shadow: 0 8px 32px 0 rgba(99,102,241,0.10);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      background: var(--bg-gradient);
+      color: #222;
+      display: flex;
+      flex-direction: column;
+    }
+    .top-title-bar {
+      width: 100vw;
+      background: linear-gradient(90deg, #6366f1 0%, #38bdf8 100%);
+      color: #fff;
+      font-size: 1.35rem;
+      font-weight: 800;
+      text-align: center;
+      letter-spacing: 1px;
+      padding: 18px 0 14px 0;
+      box-shadow: 0 2px 12px #6366f144;
+      z-index: 100;
+      position: relative;
+    }
+    #main-app {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+    }
+    #sidebar {
+      width: 220px;
+      background: rgba(30,30,47,0.95);
+      color: #fff;
+      padding: 24px 16px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      box-shadow: 2px 0 16px #6366f122;
+      z-index: 2;
+      position: relative;
+      backdrop-filter: blur(8px);
+      transition: all 0.3s;
+    }
+    #sidebar h2 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-bottom: 18px;
+      letter-spacing: 1px;
+      color: var(--primary);
+    }
+    #student-list {
+      list-style: none;
+      padding: 0;
+      width: 100%;
+    }
+    #student-list li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1rem;
+      background: rgba(46,46,63,0.7);
+      transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+      border: 2px solid transparent;
+      position: relative;
+    }
+    #student-list li.selected {
+      background: linear-gradient(90deg, var(--primary) 60%, var(--secondary) 100%);
+      color: #fff;
+      box-shadow: 0 2px 12px var(--primary)44;
+      border: 2px solid var(--secondary);
+    }
+    #student-list li:hover {
+      background: rgba(99,102,241,0.15);
+      color: var(--primary);
+    }
+    #student-list .avatar {
+      font-size: 1.5rem;
+      filter: drop-shadow(0 2px 8px #6366f144);
+    }
+    #sidebar-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 2rem;
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      z-index: 10;
+      cursor: pointer;
+    }
+    #content {
+      flex: 1;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: none;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      background: var(--bg-glass);
+      padding: 24px 32px;
+      border-radius: 0 0 24px 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 32px;
+      position: relative;
+      z-index: 1;
+      backdrop-filter: blur(8px);
+    }
+    header .avatar {
+      font-size: 2.5rem;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #a5b4fc 0%, #f0f4ff 100%);
+      box-shadow: 0 0 0 6px #e0e7ff, 0 2px 16px #6366f144;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    header h3 {
+      margin: 0 0 2px 0;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+    header p {
+      margin: 0;
+      font-size: 1rem;
+      color: #666;
+    }
+    header .welcome {
+      font-size: 1.1rem;
+      color: var(--secondary);
+      font-weight: 600;
+      margin-left: auto;
+    }
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 28px;
+      padding: 0 32px 32px 32px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    section {
+      background: var(--bg-glass);
+      padding: 24px 20px 20px 20px;
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      font-size: 1rem;
+      min-width: 0;
+      position: relative;
+      backdrop-filter: blur(6px);
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    section:hover {
+      box-shadow: 0 8px 32px 0 #6366f122, 0 2px 8px #6366f144;
+      transform: translateY(-2px) scale(1.01);
+    }
+    .card-title {
+      font-weight: 700;
+      margin-bottom: 16px;
+      font-size: 1.15rem;
+      color: var(--primary);
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .progress-bar {
+      background: #e0e0e0;
+      border-radius: 30px;
+      height: 18px;
+      width: 100%;
+      overflow: hidden;
+      margin-bottom: 8px;
+      position: relative;
+    }
+    .progress-bar .fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary) 60%, var(--secondary) 100%);
+      transition: width 0.7s cubic-bezier(.4,2,.6,1);
+      border-radius: 30px 0 0 30px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1rem;
+      padding-right: 12px;
+      box-shadow: 0 2px 8px #6366f122;
+    }
+    .progress-bar .fill:after {
+      content: attr(data-label);
+      position: absolute;
+      right: 16px;
+      top: 0;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .feedback {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--primary);
+      background: linear-gradient(90deg, #f0f4ff 0%, #a5b4fc 100%);
+      border-radius: 12px;
+      padding: 18px 18px 18px 48px;
+      position: relative;
+      margin-top: 10px;
+      box-shadow: 0 2px 8px #6366f122;
+      font-style: italic;
+    }
+    .feedback:before {
+      content: '\f10d';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      position: absolute;
+      left: 18px;
+      top: 18px;
+      font-size: 1.5rem;
+      color: #a5b4fc;
+      opacity: 0.3;
+    }
+    .confidence {
+      font-size: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .confidence-badges {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .confidence-badge {
+      padding: 7px 16px;
+      border-radius: 16px;
+      font-weight: 700;
+      font-size: 1rem;
+      background: linear-gradient(90deg, #bbf7d0 0%, #22c55e 100%);
+      color: #15803d;
+      box-shadow: 0 2px 8px #22c55e22;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .confidence-badge.medium {
+      background: linear-gradient(90deg, #fef9c3 0%, #fbbf24 100%);
+      color: #b45309;
+      box-shadow: 0 2px 8px #fbbf2422;
+    }
+    .confidence-badge.low {
+      background: linear-gradient(90deg, #fbcfe8 0%, #e94e77 100%);
+      color: #be185d;
+      box-shadow: 0 2px 8px #e94e7722;
+    }
+    .assignments-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .assignment-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.05rem;
+      padding: 10px 0;
+      border-left: 4px solid transparent;
+      border-radius: 8px;
+      background: rgba(245,245,255,0.5);
+      box-shadow: 0 1px 4px #6366f111;
+      transition: background 0.2s, border 0.2s;
+      position: relative;
+    }
+    .assignment-item.completed {
+      color: #22c55e;
+      border-left: 4px solid #22c55e;
+      background: linear-gradient(90deg, #e0fce7 60%, #f8fafc 100%);
+    }
+    .assignment-item.pending {
+      color: #fbbf24;
+      border-left: 4px solid #fbbf24;
+      background: linear-gradient(90deg, #fffbe6 60%, #f8fafc 100%);
+    }
+    .assignment-item.overdue {
+      color: #e94e77;
+      border-left: 4px solid #e94e77;
+      background: linear-gradient(90deg, #fbcfe8 60%, #f8fafc 100%);
+    }
+    .assignment-icon {
+      font-size: 1.2rem;
+      width: 24px;
+      text-align: center;
+    }
+    .assignment-status {
+      font-size: 0.95rem;
+      font-weight: 700;
+      border-radius: 12px;
+      padding: 4px 12px;
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .assignment-status.completed {
+      background: #e0fce7;
+      color: #22c55e;
+    }
+    .assignment-status.pending {
+      background: #fffbe6;
+      color: #fbbf24;
+    }
+    .assignment-status.overdue {
+      background: #fbcfe8;
+      color: #e94e77;
+    }
+    /* Responsive styles */
+    @media (max-width: 900px) {
+      #main-app {
+        flex-direction: column;
+      }
+      #sidebar {
+        width: 100vw;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 8px;
+        box-shadow: 0 2px 8px #6366f122;
+        position: static;
+        border-radius: 0 0 18px 18px;
+      }
+      #sidebar h2 {
+        margin-bottom: 0;
+        font-size: 1.1rem;
+      }
+      #student-list {
+        display: flex;
+        flex-direction: row;
+        gap: 6px;
+        width: auto;
+        margin: 0;
+      }
+      #student-list li {
+        margin-bottom: 0;
+        padding: 8px 10px;
+        font-size: 0.98rem;
+      }
+      .dashboard-grid {
+        padding: 0 8px 24px 8px;
+        gap: 18px;
+        grid-template-columns: 1fr;
+      }
+      header {
+        padding: 18px 8px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      .top-title-bar { font-size: 1.05rem; padding: 12px 0 10px 0; }
+    }
+    @media (max-width: 600px) {
+      .dashboard-grid { grid-template-columns: 1fr; padding: 0 2px 16px 2px; gap: 10px; }
+      section { padding: 10px 4px 8px 4px; font-size: 0.97rem; }
+      header h3 { font-size: 1.1rem; }
+      header .avatar { font-size: 1.5rem; padding: 4px; }
+      .top-title-bar { font-size: 0.95rem; padding: 8px 0 7px 0; }
+      #sidebar { padding: 8px 2px; }
+      #sidebar h2 { font-size: 1rem; }
+      #student-list li { font-size: 0.93rem; padding: 6px 6px; }
+      .progress-bar { height: 12px; }
+      .progress-bar .fill, .progress-bar .fill:after { font-size: 0.9rem; }
+      .card-title { font-size: 1rem; }
+      .feedback { font-size: 1rem; padding: 12px 12px 12px 32px; }
+      .assignments-list { gap: 6px; }
+      .assignment-item { font-size: 0.95rem; padding: 6px 0; }
+      .assignment-status { font-size: 0.85rem; padding: 2px 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="top-title-bar">GritSkool Student Performance Tracker v1</div>
+  <div id="main-app">
+    <nav id="sidebar">
+      <h2><i class="fa-solid fa-users"></i> Students</h2>
+      <ul id="student-list"></ul>
+    </nav>
+    <div id="content">
+      <header id="profile"></header>
+      <div class="dashboard-grid">
+        <section id="attendance"></section>
+        <section>
+          <div class="card-title"><i class="fa-solid fa-chart-column"></i> Quiz Score Trends</div>
+          <canvas id="quizBar" width="320" height="180"></canvas>
+        </section>
+        <section id="skills"></section>
+        <section id="feedback"></section>
+        <section>
+          <div class="card-title"><i class="fa-solid fa-bullseye"></i> Confidence Radar</div>
+          <canvas id="confidenceRadar" width="320" height="180"></canvas>
+        </section>
+        <section id="assignments"></section>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const students = [
+      { id:1, name:"Alice", avatar:"👩‍🎓", attendance:90, quizScores:[80,85,90], feedbackCount:5, skillProgress:{JS:60, HTML:80, CSS:70}, confidence:[3,4,4,5], assignments:[
+        { title: "Math Homework", due: "Due by tomorrow", status: "pending" },
+        { title: "Science Project", due: "Due by tomorrow", status: "completed" },
+        { title: "History Essay", due: "Due by tomorrow", status: "pending" }
+      ], mentorFeedback: "Great improvement in JS, keep practicing CSS!" },
+      { id:2, name:"Bob", avatar:"👨‍🎓", attendance:75, quizScores:[70,65,80], feedbackCount:3, skillProgress:{JS:50, HTML:70, CSS:60}, confidence:[2,3,3,4], assignments:[
+        { title: "Math Homework", due: "Due by tomorrow", status: "overdue" },
+        { title: "Science Project", due: "Due by tomorrow", status: "pending" },
+        { title: "History Essay", due: "Due by tomorrow", status: "completed" }
+      ], mentorFeedback: "Focus more on Math assignments and ask questions in class." },
+      { id:3, name:"Charlie", avatar:"🧑‍🎓", attendance:85, quizScores:[90,92,88], feedbackCount:7, skillProgress:{JS:80, HTML:85, CSS:75}, confidence:[4,4,5,5], assignments:[
+        { title: "Math Homework", due: "Due by tomorrow", status: "completed" },
+        { title: "Science Project", due: "Due by tomorrow", status: "completed" },
+        { title: "History Essay", due: "Due by tomorrow", status: "pending" }
+      ], mentorFeedback: "Excellent work! Try to help your peers with HTML." }
+    ];
+    const studentListEl = document.getElementById("student-list");
+    const profileEl = document.getElementById("profile");
+    const attendanceEl = document.getElementById("attendance");
+    const skillsEl = document.getElementById("skills");
+    const feedbackEl = document.getElementById("feedback");
+    const assignmentsEl = document.getElementById("assignments");
+    let quizBarChart, confidenceRadarChart;
+    function renderStudent(id) {
+      document.querySelectorAll('#student-list li').forEach(el => {
+        el.classList.toggle('selected', +el.dataset.id === id);
+      });
+      const s = students.find(s => s.id === id);
+      profileEl.innerHTML = `
+        <div class="avatar">${s.avatar}</div>
+        <div><h3>${s.name}</h3><p>ID: ${s.id}</p></div>
+        <div class="welcome">Welcome back, ${s.name.split(' ')[0] || s.name}!</div>
+      `;
+      attendanceEl.innerHTML = `
+        <div class="card-title"><i class="fa-solid fa-calendar-check"></i> Attendance</div>
+        <div class="progress-bar"><div class="fill" style="width:${s.attendance}%" data-label="${s.attendance}%"></div></div>
+        <div><strong>${s.attendance}%</strong> attended</div>
+      `;
+      skillsEl.innerHTML = `<div class="card-title"><i class="fa-solid fa-brain"></i> Skill Progress</div>`;
+      for (const [skill, val] of Object.entries(s.skillProgress)) {
+        const icon = skill === 'JS' ? '<i class="fa-brands fa-js"></i>' : skill === 'HTML' ? '<i class="fa-brands fa-html5"></i>' : '<i class="fa-brands fa-css3-alt"></i>';
+        skillsEl.innerHTML += `
+          <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">${icon}<span>${skill}</span></div>
+          <div class="progress-bar"><div class="fill" style="width:${val}%" data-label="${val}%"></div></div>
+        `;
+      }
+      feedbackEl.innerHTML = `
+        <div class="card-title"><i class="fa-solid fa-comment-dots"></i> Mentor Feedback</div>
+        <div class="feedback">${s.mentorFeedback}</div>
+      `;
+      // Assignments
+      assignmentsEl.innerHTML = `<div class="card-title"><i class="fa-solid fa-tasks"></i> Assignments Status</div><ul class="assignments-list">$${s.assignments.map(a => `
+        <li class="assignment-item ${a.status}">
+          <span class="assignment-icon">${a.status === 'completed' ? '<i class=\'fa-solid fa-check-circle\'></i>' : a.status === 'pending' ? '<i class=\'fa-solid fa-hourglass-half\'></i>' : '<i class=\'fa-solid fa-exclamation-circle\'></i>'}</span>
+          <span>${a.title}</span>
+          <span style="font-size:0.95rem;color:#888;">${a.due}</span>
+          <span class="assignment-status ${a.status}">${a.status.charAt(0).toUpperCase() + a.status.slice(1)}</span>
+        </li>
+      `).join('')}</ul>`;
+      // Quiz Bar Chart
+      if (quizBarChart) quizBarChart.destroy();
+      quizBarChart = new Chart(document.getElementById('quizBar').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: s.quizScores.map((_,i)=>`Quiz ${i+1}`),
+          datasets: [{
+            label: 'Score',
+            data: s.quizScores,
+            backgroundColor: [
+              'rgba(99,102,241,0.8)',
+              'rgba(56,189,248,0.8)',
+              'rgba(251,191,36,0.8)',
+              'rgba(34,197,94,0.8)',
+              'rgba(233,78,119,0.8)'
+            ],
+            borderRadius: 8,
+            maxBarThickness: 40
+          }]
+        },
+        options: {
+          responsive: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, max: 100, grid: { color: '#e0e0e0' } },
+            x: { grid: { display: false } }
+          },
+          animation: { duration: 900, easing: 'easeOutElastic' }
+        }
+      });
+      // Confidence Radar Chart
+      if (confidenceRadarChart) confidenceRadarChart.destroy();
+      confidenceRadarChart = new Chart(document.getElementById('confidenceRadar').getContext('2d'), {
+        type: 'radar',
+        data: {
+          labels: ['JS','HTML','CSS','Teamwork'],
+          datasets: [{
+            label: 'Confidence',
+            data: s.confidence,
+            backgroundColor: 'rgba(99,102,241,0.15)',
+            borderColor: 'rgba(99,102,241,0.8)',
+            pointBackgroundColor: [
+              'rgba(99,102,241,1)',
+              'rgba(56,189,248,1)',
+              'rgba(251,191,36,1)',
+              'rgba(34,197,94,1)'
+            ],
+            pointRadius: 6,
+            pointHoverRadius: 9,
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            r: {
+              min: 0,
+              max: 5,
+              ticks: { stepSize: 1, color: '#888', font: { size: 12 } },
+              pointLabels: { color: '#6366f1', font: { size: 14, weight: 'bold' } },
+              grid: { color: '#e0e0e0' },
+              angleLines: { color: '#e0e0e0' }
+            }
+          },
+          animation: { duration: 900, easing: 'easeOutElastic' }
+        }
+      });
+    }
+    students.forEach(s => {
+      const li = document.createElement("li");
+      li.innerHTML = `<span class="avatar">${s.avatar}</span> <span>${s.name}</span>`;
+      li.dataset.id = s.id;
+      li.onclick = () => renderStudent(s.id);
+      studentListEl.appendChild(li);
+    });
+    renderStudent(students[0].id);
+  </script>
+</body>
+</html>
